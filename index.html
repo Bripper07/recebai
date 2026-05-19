@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RecebAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'DM Sans', sans-serif; background: #f4f6fb; display: flex; min-height: 100vh; }
+.sidebar { width: 220px; background: #1a1a2e; color: #fff; padding: 0; display: flex; flex-direction: column; flex-shrink: 0; }
+.sidebar-logo { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.sidebar-logo h1 { font-size: 20px; font-weight: 600; color: #fff; }
+.sidebar-logo span { color: #4f8ef7; }
+.sidebar-logo p { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+.nav { padding: 12px 0; flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 20px; cursor: pointer; font-size: 14px; color: rgba(255,255,255,0.55); transition: all 0.15s; border-left: 3px solid transparent; }
+.nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.nav-item.active { background: rgba(79,142,247,0.12); color: #4f8ef7; border-left-color: #4f8ef7; }
+.nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.main { flex: 1; padding: 32px; overflow-y: auto; }
+.page { display: none; }
+.page.active { display: block; }
+.page-title { font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 6px; }
+.page-sub { font-size: 14px; color: #8a94a6; margin-bottom: 28px; }
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+.stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e8ecf4; }
+.stat-label { font-size: 13px; color: #8a94a6; margin-bottom: 8px; }
+.stat-value { font-size: 28px; font-weight: 600; color: #1a1a2e; }
+.stat-value.blue { color: #4f8ef7; }
+.stat-value.amber { color: #f59e0b; }
+.stat-value.green { color: #10b981; }
+.card { background: #fff; border-radius: 12px; border: 1px solid #e8ecf4; padding: 24px; }
+.form-group { margin-bottom: 18px; }
+.form-label { display: block; font-size: 13px; font-weight: 500; color: #4a5568; margin-bottom: 6px; }
+.form-input { width: 100%; padding: 10px 14px; border: 1px solid #dde3ee; border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border 0.15s; color: #1a1a2e; background: #fff; }
+.form-input:focus { border-color: #4f8ef7; box-shadow: 0 0 0 3px rgba(79,142,247,0.1); }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.btn { padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
+.btn-primary { background: #4f8ef7; color: #fff; }
+.btn-primary:hover { background: #3a7ce8; }
+.btn-primary:disabled { background: #a0b8f0; cursor: not-allowed; }
+.btn-sm { padding: 6px 14px; font-size: 13px; }
+.btn-confirm { background: #10b981; color: #fff; }
+.btn-confirm:hover { background: #059669; }
+.alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; display: none; }
+.alert-success { background: #d1fae5; color: #065f46; }
+.alert-error { background: #fee2e2; color: #991b1b; }
+.search-bar { margin-bottom: 20px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; padding: 10px 14px; font-size: 12px; font-weight: 500; color: #8a94a6; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e8ecf4; }
+td { padding: 13px 14px; border-bottom: 1px solid #f0f3f9; color: #2d3748; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f8faff; }
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+.badge-waiting { background: #fef3c7; color: #92400e; }
+.badge-done { background: #d1fae5; color: #065f46; }
+.empty-state { text-align: center; padding: 48px 20px; color: #8a94a6; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
+.modal-overlay.open { display: flex; }
+.modal { background: #fff; border-radius: 14px; padding: 28px; width: 400px; max-width: 90vw; }
+.modal h3 { font-size: 17px; font-weight: 600; color: #1a1a2e; margin-bottom: 6px; }
+.modal p { font-size: 14px; color: #8a94a6; margin-bottom: 20px; }
+.modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+.btn-cancel { background: #f4f6fb; color: #4a5568; }
+.loading { text-align: center; padding: 40px; color: #8a94a6; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <h1>Receb<span>AI</span></h1>
+    <p>Gestão de Encomendas</p>
+  </div>
+  <nav class="nav">
+    <div class="nav-item active" onclick="navigate('dashboard')">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="navigate('portaria')">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M12 2l7 4v6c0 5-7 10-7 10S5 17 5 12V6l7-4z"/></svg>
+      Portaria
+    </div>
+    <div class="nav-item" onclick="navigate('encomendas')">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8l-2 4h12l-2-4z"/></svg>
+      Encomendas
+    </div>
+    <div class="nav-item" onclick="navigate('historico')">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      Histórico
+    </div>
+  </nav>
+</div>
+
+<main class="main">
+
+  <div id="dashboard" class="page active">
+    <div class="page-title">Dashboard</div>
+    <div class="page-sub">Resumo geral das encomendas</div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Total de Encomendas</div><div class="stat-value blue" id="stat-total">—</div></div>
+      <div class="stat-card"><div class="stat-label">Aguardando Retirada</div><div class="stat-value amber" id="stat-aguardando">—</div></div>
+      <div class="stat-card"><div class="stat-label">Retiradas Hoje</div><div class="stat-value green" id="stat-hoje">—</div></div>
+    </div>
+    <div class="card">
+      <div style="font-size:15px;font-weight:500;color:#1a1a2e;margin-bottom:16px">Encomendas aguardando retirada</div>
+      <div id="dashboard-pending"><div class="loading">Carregando...</div></div>
+    </div>
+  </div>
+
+  <div id="portaria" class="page">
+    <div class="page-title">Registrar Encomenda</div>
+    <div class="page-sub">Preencha os dados da encomenda que chegou na portaria</div>
+    <div class="card" style="max-width:580px">
+      <div id="form-alert" class="alert"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Código de Rastreio</label>
+          <input class="form-input" id="f-tracking" placeholder="BR123456789BR" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Transportadora</label>
+          <input class="form-input" id="f-transportadora" placeholder="Correios, Jadlog..." />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nome do Destinatário</label>
+          <input class="form-input" id="f-nome" placeholder="João Silva" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unidade / Apto</label>
+          <input class="form-input" id="f-unidade" placeholder="Apto 42 - Bloco B" />
+        </div>
+      </div>
+      <button class="btn btn-primary" id="btn-registrar" onclick="registrarEncomenda()">Registrar Encomenda</button>
+    </div>
+  </div>
+
+  <div id="encomendas" class="page">
+    <div class="page-title">Encomendas</div>
+    <div class="page-sub">Todas as encomendas registradas</div>
+    <div class="search-bar">
+      <input class="form-input" id="search-input" placeholder="Buscar por nome ou unidade..." oninput="filterTable()" style="max-width:340px" />
+    </div>
+    <div class="card">
+      <div id="encomendas-table"><div class="loading">Carregando...</div></div>
+    </div>
+  </div>
+
+  <div id="historico" class="page">
+    <div class="page-title">Histórico</div>
+    <div class="page-sub">Encomendas já retiradas</div>
+    <div class="card">
+      <div id="historico-table"><div class="loading">Carregando...</div></div>
+    </div>
+  </div>
+
+</main>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3>Confirmar Retirada</h3>
+    <p>Informe quem está retirando a encomenda</p>
+    <div class="form-group">
+      <label class="form-label">Nome de quem está retirando</label>
+      <input class="form-input" id="modal-retirada-por" placeholder="Nome completo" />
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-confirm" onclick="confirmarRetirada()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE = 'https://bripper.app.n8n.cloud/webhook';
+let allEncomendas = [];
+let currentRetiradaId = null;
+
+function navigate(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+  const idx = ['dashboard','portaria','encomendas','historico'].indexOf(page);
+  document.querySelectorAll('.nav-item')[idx].classList.add('active');
+  if (page === 'dashboard') loadDashboard();
+  if (page === 'encomendas') loadEncomendas();
+  if (page === 'historico') loadHistorico();
+}
+
+async function loadDashboard() {
+  try {
+    const [stats, enc] = await Promise.all([
+      fetch(API_BASE + '/recebai/stats').then(r => r.json()),
+      fetch(API_BASE + '/recebai/encomendas?status=aguardando_retirada').then(r => r.json())
+    ]);
+    const s = Array.isArray(stats) ? stats[0] : stats;
+    document.getElementById('stat-total').textContent = s.total ?? 0;
+    document.getElementById('stat-aguardando').textContent = s.aguardando ?? 0;
+    document.getElementById('stat-hoje').textContent = s.retirado_hoje ?? 0;
+    const pending = Array.isArray(enc) ? enc.filter(e => e.id && e.id !== 'id') : [];
+    const el = document.getElementById('dashboard-pending');
+    if (pending.length === 0) { el.innerHTML = '<div class="empty-state">Nenhuma encomenda aguardando retirada</div>'; return; }
+    el.innerHTML = renderTable(pending, false);
+  } catch(e) { console.error(e); }
+}
+
+async function loadEncomendas() {
+  try {
+    const data = await fetch(API_BASE + '/recebai/encomendas').then(r => r.json());
+    allEncomendas = Array.isArray(data) ? data.filter(e => e.id && e.id !== 'id') : [];
+    renderEncomendasTable();
+  } catch(e) { console.error(e); }
+}
+
+async function loadHistorico() {
+  try {
+    const data = await fetch(API_BASE + '/recebai/encomendas?status=retirado').then(r => r.json());
+    const rows = Array.isArray(data) ? data.filter(e => e.id && e.id !== 'id') : [];
+    const el = document.getElementById('historico-table');
+    if (rows.length === 0) { el.innerHTML = '<div class="empty-state">Nenhuma encomenda retirada ainda</div>'; return; }
+    el.innerHTML = renderTable(rows, false);
+  } catch(e) { console.error(e); }
+}
+
+function filterTable() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const filtered = allEncomendas.filter(e =>
+    (e.destinatario_nome||'').toLowerCase().includes(q) ||
+    (e.destinatario_unidade||'').toLowerCase().includes(q)
+  );
+  document.getElementById('encomendas-table').innerHTML = filtered.length ? renderTable(filtered, true) : '<div class="empty-state">Nenhum resultado encontrado</div>';
+}
+
+function renderEncomendasTable() {
+  const el = document.getElementById('encomendas-table');
+  if (allEncomendas.length === 0) { el.innerHTML = '<div class="empty-state">Nenhuma encomenda cadastrada</div>'; return; }
+  el.innerHTML = renderTable(allEncomendas, true);
+}
+
+function renderTable(rows, showAction) {
+  const header = `<table><thead><tr><th>Código</th><th>Destinatário</th><th>Unidade</th><th>Transportadora</th><th>Status</th><th>Chegada</th>${showAction ? '<th>Ação</th>' : ''}</tr></thead><tbody>`;
+  const body = rows.map(r => {
+    const isWaiting = r.status === 'aguardando_retirada';
+    const badge = isWaiting
+      ? '<span class="badge badge-waiting">⏳ Aguardando</span>'
+      : '<span class="badge badge-done">✓ Retirado</span>';
+    const action = showAction && isWaiting
+      ? `<button class="btn btn-sm btn-confirm" onclick="openModal('${r.id}')">Confirmar Retirada</button>`
+      : (showAction ? '<span style="color:#8a94a6;font-size:13px">—</span>' : '');
+    const date = r.created_at ? new Date(r.created_at).toLocaleDateString('pt-BR') : '—';
+    return `<tr><td style="font-family:monospace;font-size:13px">${r.tracking_code||'—'}</td><td>${r.destinatario_nome||'—'}</td><td>${r.destinatario_unidade||'—'}</td><td>${r.transportadora||'—'}</td><td>${badge}</td><td>${date}</td>${showAction ? `<td>${action}</td>` : ''}</tr>`;
+  }).join('');
+  return header + body + '</tbody></table>';
+}
+
+async function registrarEncomenda() {
+  const tracking = document.getElementById('f-tracking').value.trim();
+  const nome = document.getElementById('f-nome').value.trim();
+  const unidade = document.getElementById('f-unidade').value.trim();
+  const transp = document.getElementById('f-transportadora').value.trim();
+  const alertEl = document.getElementById('form-alert');
+  if (!tracking || !nome || !unidade || !transp) {
+    showAlert(alertEl, 'error', 'Preencha todos os campos.');
+    return;
+  }
+  const btn = document.getElementById('btn-registrar');
+  btn.disabled = true; btn.textContent = 'Registrando...';
+  try {
+    const res = await fetch(API_BASE + '/recebai/encomendas', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tracking_code: tracking, destinatario_nome: nome, destinatario_unidade: unidade, transportadora: transp })
+    });
+    if (!res.ok) throw new Error();
+    showAlert(alertEl, 'success', 'Encomenda registrada com sucesso!');
+    document.getElementById('f-tracking').value = '';
+    document.getElementById('f-nome').value = '';
+    document.getElementById('f-unidade').value = '';
+    document.getElementById('f-transportadora').value = '';
+  } catch(e) {
+    showAlert(alertEl, 'error', 'Erro ao registrar. Tente novamente.');
+  }
+  btn.disabled = false; btn.textContent = 'Registrar Encomenda';
+}
+
+function showAlert(el, type, msg) {
+  el.className = 'alert alert-' + type;
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+function openModal(id) {
+  currentRetiradaId = id;
+  document.getElementById('modal-retirada-por').value = '';
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  currentRetiradaId = null;
+}
+
+async function confirmarRetirada() {
+  const nome = document.getElementById('modal-retirada-por').value.trim();
+  if (!nome) { alert('Informe o nome de quem está retirando.'); return; }
+  try {
+    const res = await fetch(API_BASE + '/recebai/encomendas/retirar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: currentRetiradaId, retirada_por: nome })
+    });
+    if (!res.ok) throw new Error();
+    closeModal();
+    loadEncomendas();
+    loadDashboard();
+  } catch(e) {
+    alert('Erro ao confirmar retirada. Tente novamente.');
+  }
+}
+
+loadDashboard();
+</script>
+</body>
+</html>
