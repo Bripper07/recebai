@@ -91,6 +91,10 @@ tr:hover td { background: #f8faff; }
       <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       Histórico
     </div>
+    <div class="nav-item" onclick="navigate('moradores')">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+      Moradores
+    </div>
   </nav>
 </div>
 
@@ -162,15 +166,47 @@ tr:hover td { background: #f8faff; }
     </div>
   </div>
 
+  <div id="moradores" class="page">
+    <div class="page-title">Cadastro de Moradores</div>
+    <div class="page-sub">Cadastre os moradores do condomínio</div>
+    <div class="card" style="max-width:580px; margin-bottom:28px">
+      <div id="morador-alert" class="alert"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nome completo</label>
+          <input class="form-input" id="m-nome" placeholder="João Silva" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">CPF</label>
+          <input class="form-input" id="m-cpf" placeholder="000.000.000-00" />
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Celular (WhatsApp)</label>
+          <input class="form-input" id="m-celular" placeholder="21999999999 (com DDD)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Unidade / Apto</label>
+          <input class="form-input" id="m-unidade" placeholder="Apto 42 - Bloco B" />
+        </div>
+      </div>
+      <button class="btn btn-primary" id="btn-cadastrar-morador" onclick="cadastrarMorador()">Cadastrar Morador</button>
+    </div>
+    <div class="card">
+      <div style="font-size:15px;font-weight:500;color:#1a1a2e;margin-bottom:16px">Moradores cadastrados</div>
+      <div id="moradores-table"><div class="loading">Carregando...</div></div>
+    </div>
+  </div>
+
 </main>
 
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal">
     <h3>Confirmar Retirada</h3>
-    <p>Informe quem está retirando a encomenda</p>
+    <p>Informe o nome de quem está retirando a encomenda.</p>
     <div class="form-group">
-      <label class="form-label">Nome de quem está retirando</label>
-      <input class="form-input" id="modal-retirada-por" placeholder="Nome completo" />
+      <input class="form-input" id="modal-retirada-por" placeholder="Nome de quem retirou" />
     </div>
     <div class="modal-actions">
       <button class="btn btn-cancel" onclick="closeModal()">Cancelar</button>
@@ -188,11 +224,12 @@ function navigate(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById(page).classList.add('active');
-  const idx = ['dashboard','portaria','encomendas','historico'].indexOf(page);
+  const idx = ['dashboard','portaria','encomendas','historico','moradores'].indexOf(page);
   document.querySelectorAll('.nav-item')[idx].classList.add('active');
   if (page === 'dashboard') loadDashboard();
   if (page === 'encomendas') loadEncomendas();
   if (page === 'historico') loadHistorico();
+  if (page === 'moradores') loadMoradores();
 }
 
 async function loadDashboard() {
@@ -227,6 +264,18 @@ async function loadHistorico() {
     const el = document.getElementById('historico-table');
     if (rows.length === 0) { el.innerHTML = '<div class="empty-state">Nenhuma encomenda retirada ainda</div>'; return; }
     el.innerHTML = renderTable(rows, false);
+  } catch(e) { console.error(e); }
+}
+
+async function loadMoradores() {
+  try {
+    const data = await fetch(API_BASE + '/recebai/moradores').then(r => r.json());
+    const rows = Array.isArray(data) ? data.filter(m => m.id && m.id !== 'id') : [];
+    const el = document.getElementById('moradores-table');
+    if (rows.length === 0) { el.innerHTML = '<div class="empty-state">Nenhum morador cadastrado ainda</div>'; return; }
+    const header = `<table><thead><tr><th>Nome</th><th>CPF</th><th>Celular</th><th>Unidade</th></tr></thead><tbody>`;
+    const body = rows.map(m => `<tr><td>${m.nome||'—'}</td><td>${m.cpf||'—'}</td><td>${m.celular||'—'}</td><td>${m.unidade||'—'}</td></tr>`).join('');
+    el.innerHTML = header + body + '</tbody></table>';
   } catch(e) { console.error(e); }
 }
 
@@ -291,6 +340,37 @@ async function registrarEncomenda() {
     showAlert(alertEl, 'error', 'Erro ao registrar. Tente novamente.');
   }
   btn.disabled = false; btn.textContent = 'Registrar Encomenda';
+}
+
+async function cadastrarMorador() {
+  const nome = document.getElementById('m-nome').value.trim();
+  const cpf = document.getElementById('m-cpf').value.trim();
+  const celular = document.getElementById('m-celular').value.trim();
+  const unidade = document.getElementById('m-unidade').value.trim();
+  const alertEl = document.getElementById('morador-alert');
+  if (!nome || !celular || !unidade) {
+    showAlert(alertEl, 'error', 'Preencha Nome, Celular e Unidade.');
+    return;
+  }
+  const btn = document.getElementById('btn-cadastrar-morador');
+  btn.disabled = true; btn.textContent = 'Cadastrando...';
+  try {
+    const res = await fetch(API_BASE + '/recebai/moradores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nome, cpf, celular, unidade })
+    });
+    if (!res.ok) throw new Error();
+    showAlert(alertEl, 'success', 'Morador cadastrado com sucesso!');
+    document.getElementById('m-nome').value = '';
+    document.getElementById('m-cpf').value = '';
+    document.getElementById('m-celular').value = '';
+    document.getElementById('m-unidade').value = '';
+    loadMoradores();
+  } catch(e) {
+    showAlert(alertEl, 'error', 'Erro ao cadastrar. Tente novamente.');
+  }
+  btn.disabled = false; btn.textContent = 'Cadastrar Morador';
 }
 
 function showAlert(el, type, msg) {
