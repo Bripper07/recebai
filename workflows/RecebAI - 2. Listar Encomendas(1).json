@@ -1,0 +1,145 @@
+{
+  "name": "RecebAI - 2. Listar Encomendas",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c",
+          "mode": "list",
+          "cachedResultName": "RecebAI - Encomendas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 538604356,
+          "mode": "list",
+          "cachedResultName": "RecebAI - Encomendas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c/edit#gid=538604356"
+        },
+        "options": {}
+      },
+      "id": "97f2a20a-6f4d-4324-9c76-bee5c49dbe20",
+      "name": "Read Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        240,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JW4gcQxxS5nT3Yg5",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const status = $('GET /recebai/encomendas').first().json.query?.status;\nconst items = $input.all().map(i => i.json).filter(i => i.id && i.id !== 'id');\nconst filtered = status ? items.filter(i => i.status === status) : items;\nreturn filtered.map(item => ({ json: item }));"
+      },
+      "id": "a38f006e-d825-42a0-9aab-5a226aba02df",
+      "name": "Filter by status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "8dbf2e93-2cf3-4fdc-9bcb-bd7d430799e6",
+      "name": "Respond JSON",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "path": "recebai/encomendas",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "398fe244-616d-4b38-b141-932fe7908994",
+      "name": "GET /recebai/encomendas",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "74bdd150-75ea-4d8f-8ce4-1665d32982b1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Read Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Filter by status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter by status": {
+      "main": [
+        [
+          {
+            "node": "Respond JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET /recebai/encomendas": {
+      "main": [
+        [
+          {
+            "node": "Read Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5ccdd2ce-c0f9-4421-80c1-57d37a777eb7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bf9dc3d102431748f164ce4c7940eff04280c1180b1f406274f5bb58e494fbcf"
+  },
+  "id": "EBzklBALu4YcWrPW",
+  "tags": []
+}

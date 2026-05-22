@@ -1,0 +1,145 @@
+{
+  "name": "RecebAI - 5. Stats",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c",
+          "mode": "list",
+          "cachedResultName": "RecebAI - Encomendas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 538604356,
+          "mode": "list",
+          "cachedResultName": "RecebAI - Encomendas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c/edit#gid=538604356"
+        },
+        "options": {}
+      },
+      "id": "193094b4-7417-4c83-9014-81ff6cf4bc0a",
+      "name": "Read All",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        240,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JW4gcQxxS5nT3Yg5",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = $input.all().map(r => r.json).filter(r => r.id && r.id !== 'id');\nconst today = new Date().toISOString().split('T')[0];\nconst total = rows.length;\nconst aguardando = rows.filter(r => r.status === 'aguardando_retirada').length;\nconst retirado_hoje = rows.filter(r => r.status === 'retirado' && r.retirada_at && r.retirada_at.startsWith(today)).length;\nreturn [{ json: { total, aguardando, retirado_hoje } }];"
+      },
+      "id": "36200f6f-bca9-4b72-b681-0c9daf2c32c9",
+      "name": "Calculate Stats",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "d6b8d694-030a-4633-98d8-bfd717a804c4",
+      "name": "Respond Stats",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "path": "recebai/stats",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "a81d074c-b1e5-4cee-b3d8-bd6a40f18603",
+      "name": "GET /recebai/stats",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        0
+      ],
+      "webhookId": "03af95bd-4a8e-4024-bf57-401150884328"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Read All": {
+      "main": [
+        [
+          {
+            "node": "Calculate Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Stats": {
+      "main": [
+        [
+          {
+            "node": "Respond Stats",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GET /recebai/stats": {
+      "main": [
+        [
+          {
+            "node": "Read All",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "d3968029-289c-407f-8c19-e442e063c39f",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bf9dc3d102431748f164ce4c7940eff04280c1180b1f406274f5bb58e494fbcf"
+  },
+  "id": "VhEnQhyllNYtjvbF",
+  "tags": []
+}

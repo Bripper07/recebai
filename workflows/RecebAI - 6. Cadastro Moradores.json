@@ -1,0 +1,197 @@
+{
+  "name": "RecebAI - 6. Cadastro Moradores",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "recebai/moradores",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8df15361-ea51-44b5-820a-150250dbd32e",
+      "name": "Webhook",
+      "webhookId": "9f361716-b0a5-489c-a6eb-c8f590f401ae"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nconst id = 'mor_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);\n\nreturn [{\n  json: {\n    id,\n    nome: body.nome || '',\n    cpf: body.cpf || '',\n    celular: '55' + (body.celular || '').replace(/\\D/g, ''),\n    unidade: body.unidade || ''\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "ec7795cb-00d6-4969-b44c-9b9a1aaf44a2",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"success\": true }",
+        "options": {
+          "responseCode": 201
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        624,
+        0
+      ],
+      "id": "f646d227-3e63-4a69-9285-4cfc7d0f7e8d",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c",
+          "mode": "list",
+          "cachedResultName": "RecebAI - Encomendas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1351855729,
+          "mode": "list",
+          "cachedResultName": "RecebAI - Moradores",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c/edit#gid=1351855729"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "nome": "={{ $json.nome }}",
+            "cpf": "={{ $json.cpf }}",
+            "celular": "={{ $json.celular }}",
+            "unidade": "={{ $json.unidade }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "nome",
+              "displayName": "nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cpf",
+              "displayName": "cpf",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "celular",
+              "displayName": "celular",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "unidade",
+              "displayName": "unidade",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        0
+      ],
+      "id": "d10e7dcd-74be-4875-9e68-f59ce3f50e54",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JW4gcQxxS5nT3Yg5",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "90e8c4d2-840d-4158-9ef9-cb38155e4296",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bf9dc3d102431748f164ce4c7940eff04280c1180b1f406274f5bb58e494fbcf"
+  },
+  "id": "nvlLFQ8hDqQLVvHL",
+  "tags": []
+}

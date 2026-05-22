@@ -1,0 +1,300 @@
+{
+  "name": "RecebAI - 3. Registrar Encomenda",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "recebai/encomendas",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "id": "221f2d06-1e48-41ef-bccc-7b0e98dc1c9f",
+      "name": "POST /recebai/encomendas",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "a9483d14-1e28-485a-847c-6ade3ad6e71f"
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body;\nconst id = 'enc_' + Date.now() + '_' + Math.random().toString(36).substr(2,6);\nconst now = new Date().toISOString();\nreturn [{\n  json: {\n    id,\n    tracking_code: body.tracking_code || '',\n    destinatario_nome: body.destinatario_nome || '',\n    destinatario_unidade: body.destinatario_unidade || '',\n    destinatario_telefone: '55' + (body.destinatario_telefone || '').replace(/\\D/g, ''),\n    transportadora: body.transportadora || '',\n    status: 'aguardando_retirada',\n    created_at: now,\n    retirada_at: '',\n    retirada_por: ''\n  }\n}];"
+      },
+      "id": "fac979b8-943f-4447-97d5-1b4fd2a27416",
+      "name": "Prepare Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c",
+          "mode": "list",
+          "cachedResultName": "RecebAI - Encomendas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 538604356,
+          "mode": "list",
+          "cachedResultName": "RecebAI - Encomendas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c/edit#gid=538604356"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $json.id }}",
+            "tracking_code": "={{ $json.tracking_code }}",
+            "destinatario_nome": "={{ $json.destinatario_nome }}",
+            "destinatario_unidade": "={{ $json.destinatario_unidade }}",
+            "transportadora": "={{ $json.transportadora }}",
+            "status": "={{ $json.status }}",
+            "created_at": "={{ $json.created_at }}",
+            "retirada_at": "={{ $json.retirada_at }}",
+            "retirada_por": "={{ $json.retirada_por }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tracking_code",
+              "displayName": "tracking_code",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "destinatario_nome",
+              "displayName": "destinatario_nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "destinatario_unidade",
+              "displayName": "destinatario_unidade",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "transportadora",
+              "displayName": "transportadora",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "retirada_at",
+              "displayName": "retirada_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "retirada_por",
+              "displayName": "retirada_por",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "370af57e-08f1-4b1d-809a-4879d5c39078",
+      "name": "Append to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        480,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JW4gcQxxS5nT3Yg5",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {
+          "responseCode": 201,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "id": "07fd291c-e2c1-45a3-98a7-e4a4f5c2ae82",
+      "name": "Respond Created",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        720,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolution-api-production-2cb9.up.railway.app/message/sendText/RecebAI",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "65D06C605362-41A4-96E4-6AC21B96E486"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $('Prepare Data').first().json.destinatario_telefone }}\",\n  \"text\": \"Olá {{ $('Prepare Data').first().json.destinatario_nome }}! Sua encomenda ({{ $('Prepare Data').first().json.transportadora }} - {{ $('Prepare Data').first().json.tracking_code }}) chegou na portaria. Por favor, retire no horário disponível. 📦\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        928,
+        0
+      ],
+      "id": "8e48ac55-fbc5-494d-b429-ed2af8a28064",
+      "name": "HTTP Request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "POST /recebai/encomendas": {
+      "main": [
+        [
+          {
+            "node": "Prepare Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Data": {
+      "main": [
+        [
+          {
+            "node": "Append to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Respond Created",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond Created": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "017b364a-b5cf-4786-ace3-4bfe4b82fcbf",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bf9dc3d102431748f164ce4c7940eff04280c1180b1f406274f5bb58e494fbcf"
+  },
+  "id": "Vokm3ioc70y4Uzpq",
+  "tags": []
+}

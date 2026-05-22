@@ -1,0 +1,105 @@
+{
+  "name": "RecebAI - 7. Listar Moradores",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "recebai/moradores",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "26ecb14e-36ef-481b-b52d-4984991e8510",
+      "name": "Webhook",
+      "webhookId": "5e4dfe0a-45dd-4584-bbbf-8ea9af1657f1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c",
+          "mode": "list",
+          "cachedResultName": "RecebAI - Encomendas",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1351855729,
+          "mode": "list",
+          "cachedResultName": "RecebAI - Moradores",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c/edit#gid=1351855729"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "80c7dbd4-908f-4a60-a0e7-c37ea6188ea3",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "JW4gcQxxS5nT3Yg5",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        416,
+        0
+      ],
+      "id": "0083176d-36b1-49f7-963f-db373d64b310",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "78c04d72-2fc9-4e91-a47d-51291da42a11",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bf9dc3d102431748f164ce4c7940eff04280c1180b1f406274f5bb58e494fbcf"
+  },
+  "id": "IiyRzVaebz7k0l3b",
+  "tags": []
+}
