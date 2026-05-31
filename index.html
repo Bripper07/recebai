@@ -139,10 +139,6 @@ tr:hover td { background: #f8faff; }
           <input class="form-input" id="f-unidade" placeholder="Apto 42 - Bloco B" />
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Telefone WhatsApp do Destinatário</label>
-        <input class="form-input" id="f-telefone" placeholder="21999999999 (só números, com DDD)" />
-      </div>
       <button class="btn btn-primary" id="btn-registrar" onclick="registrarEncomenda()">Registrar Encomenda</button>
     </div>
   </div>
@@ -315,7 +311,6 @@ async function registrarEncomenda() {
   const nome = document.getElementById('f-nome').value.trim();
   const unidade = document.getElementById('f-unidade').value.trim();
   const transp = document.getElementById('f-transportadora').value.trim();
-  const telefone = document.getElementById('f-telefone').value.trim();
   const alertEl = document.getElementById('form-alert');
   if (!tracking || !nome || !unidade || !transp) {
     showAlert(alertEl, 'error', 'Preencha todos os campos.');
@@ -327,14 +322,13 @@ async function registrarEncomenda() {
     const res = await fetch(API_BASE + '/recebai/encomendas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tracking_code: tracking, destinatario_nome: nome, destinatario_unidade: unidade, destinatario_telefone: telefone, transportadora: transp })
+      body: JSON.stringify({ tracking_code: tracking, destinatario_nome: nome, destinatario_unidade: unidade, transportadora: transp })
     });
     if (!res.ok) throw new Error();
     showAlert(alertEl, 'success', 'Encomenda registrada com sucesso!');
     document.getElementById('f-tracking').value = '';
     document.getElementById('f-nome').value = '';
     document.getElementById('f-unidade').value = '';
-    document.getElementById('f-telefone').value = '';
     document.getElementById('f-transportadora').value = '';
   } catch(e) {
     showAlert(alertEl, 'error', 'Erro ao registrar. Tente novamente.');
