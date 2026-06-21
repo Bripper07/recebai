@@ -7,72 +7,99 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'DM Sans', sans-serif; background: #f4f6fb; display: flex; min-height: 100vh; }
-.sidebar { width: 220px; background: #1a1a2e; color: #fff; padding: 0; display: flex; flex-direction: column; flex-shrink: 0; }
-.sidebar-logo { padding: 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-.sidebar-logo h1 { font-size: 20px; font-weight: 600; color: #fff; }
-.sidebar-logo span { color: #4f8ef7; }
-.sidebar-logo p { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
-.nav { padding: 12px 0; flex: 1; }
-.nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 20px; cursor: pointer; font-size: 14px; color: rgba(255,255,255,0.55); transition: all 0.15s; border-left: 3px solid transparent; }
-.nav-item:hover { background: rgba(255,255,255,0.05); color: #fff; }
-.nav-item.active { background: rgba(79,142,247,0.12); color: #4f8ef7; border-left-color: #4f8ef7; }
+body { font-family: 'DM Sans', sans-serif; background: #F5F5F5; display: flex; min-height: 100vh; }
+
+/* SIDEBAR */
+.sidebar { width: 230px; background: #fff; color: #1a1a1a; padding: 0; display: flex; flex-direction: column; flex-shrink: 0; border-right: 1px solid #E8E8E8; }
+.sidebar-logo { padding: 20px 20px 16px; border-bottom: 1px solid #E8E8E8; }
+.sidebar-logo img { height: 44px; object-fit: contain; }
+.nav { padding: 10px 0; flex: 1; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 11px 20px; cursor: pointer; font-size: 14px; color: #6B7280; transition: all 0.15s; border-left: 3px solid transparent; }
+.nav-item:hover { background: #F9F9F9; color: #1a1a1a; }
+.nav-item.active { background: #FFF8E6; color: #D4940A; border-left-color: #F5A623; font-weight: 500; }
 .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+.sidebar-footer { padding: 16px 20px; border-top: 1px solid #E8E8E8; font-size: 12px; color: #9CA3AF; }
+
+/* MAIN */
 .main { flex: 1; padding: 32px; overflow-y: auto; }
 .page { display: none; }
 .page.active { display: block; }
-.page-title { font-size: 22px; font-weight: 600; color: #1a1a2e; margin-bottom: 6px; }
-.page-sub { font-size: 14px; color: #8a94a6; margin-bottom: 28px; }
-.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
-.stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e8ecf4; }
-.stat-label { font-size: 13px; color: #8a94a6; margin-bottom: 8px; }
-.stat-value { font-size: 28px; font-weight: 600; color: #1a1a2e; }
-.stat-value.blue { color: #4f8ef7; }
-.stat-value.amber { color: #f59e0b; }
-.stat-value.green { color: #10b981; }
-.card { background: #fff; border-radius: 12px; border: 1px solid #e8ecf4; padding: 24px; }
+.page-title { font-size: 22px; font-weight: 600; color: #111827; margin-bottom: 4px; }
+.page-sub { font-size: 14px; color: #9CA3AF; margin-bottom: 28px; }
+
+/* STATS */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+.stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #E8E8E8; }
+.stat-label { font-size: 13px; color: #9CA3AF; margin-bottom: 8px; }
+.stat-value { font-size: 28px; font-weight: 600; color: #111827; }
+.stat-value.yellow { color: #D4940A; }
+.stat-value.amber { color: #D97706; }
+.stat-value.green { color: #059669; }
+
+/* CARDS */
+.card { background: #fff; border-radius: 12px; border: 1px solid #E8E8E8; padding: 24px; }
+.card-title { font-size: 15px; font-weight: 500; color: #111827; margin-bottom: 16px; }
+
+/* FORMS */
 .form-group { margin-bottom: 18px; }
-.form-label { display: block; font-size: 13px; font-weight: 500; color: #4a5568; margin-bottom: 6px; }
-.form-input { width: 100%; padding: 10px 14px; border: 1px solid #dde3ee; border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border 0.15s; color: #1a1a2e; background: #fff; }
-.form-input:focus { border-color: #4f8ef7; box-shadow: 0 0 0 3px rgba(79,142,247,0.1); }
+.form-label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+.form-input { width: 100%; padding: 10px 14px; border: 1px solid #E0E0E0; border-radius: 8px; font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border 0.15s; color: #111827; background: #fff; }
+.form-input:focus { border-color: #F5A623; box-shadow: 0 0 0 3px rgba(245,166,35,0.12); }
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* BUTTONS */
 .btn { padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; font-family: 'DM Sans', sans-serif; transition: all 0.15s; }
-.btn-primary { background: #4f8ef7; color: #fff; }
-.btn-primary:hover { background: #3a7ce8; }
-.btn-primary:disabled { background: #a0b8f0; cursor: not-allowed; }
+.btn-primary { background: #F5A623; color: #1a1a1a; }
+.btn-primary:hover { background: #E09610; }
+.btn-primary:disabled { background: #FAD98A; cursor: not-allowed; }
 .btn-sm { padding: 6px 14px; font-size: 13px; }
-.btn-confirm { background: #10b981; color: #fff; }
-.btn-confirm:hover { background: #059669; }
+.btn-confirm { background: #F5A623; color: #1a1a1a; }
+.btn-confirm:hover { background: #E09610; }
+.btn-cancel { background: #F3F4F6; color: #374151; }
+
+/* ALERTS */
 .alert { padding: 12px 16px; border-radius: 8px; font-size: 14px; margin-bottom: 20px; display: none; }
-.alert-success { background: #d1fae5; color: #065f46; }
-.alert-error { background: #fee2e2; color: #991b1b; }
+.alert-success { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+.alert-error { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+
+/* SEARCH */
 .search-bar { margin-bottom: 20px; }
+
+/* TABLE */
 .table-wrap { overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th { text-align: left; padding: 10px 14px; font-size: 12px; font-weight: 500; color: #8a94a6; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e8ecf4; }
-td { padding: 13px 14px; border-bottom: 1px solid #f0f3f9; color: #2d3748; vertical-align: middle; }
+th { text-align: left; padding: 10px 14px; font-size: 12px; font-weight: 500; color: #9CA3AF; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #F0F0F0; background: #FAFAFA; }
+td { padding: 13px 14px; border-bottom: 1px solid #F5F5F5; color: #374151; vertical-align: middle; }
 tr:last-child td { border-bottom: none; }
-tr:hover td { background: #f8faff; }
+tr:hover td { background: #FAFAFA; }
+
+/* BADGES */
 .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; }
-.badge-waiting { background: #fef3c7; color: #92400e; }
-.badge-done { background: #d1fae5; color: #065f46; }
-.empty-state { text-align: center; padding: 48px 20px; color: #8a94a6; }
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
+.badge-waiting { background: #FEF3C7; color: #92400E; }
+.badge-done { background: #D1FAE5; color: #065F46; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 48px 20px; color: #9CA3AF; }
+.empty-state svg { width: 40px; height: 40px; margin: 0 auto 12px; display: block; color: #D1D5DB; }
+
+/* MODAL */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 100; }
 .modal-overlay.open { display: flex; }
-.modal { background: #fff; border-radius: 14px; padding: 28px; width: 400px; max-width: 90vw; }
-.modal h3 { font-size: 17px; font-weight: 600; color: #1a1a2e; margin-bottom: 6px; }
-.modal p { font-size: 14px; color: #8a94a6; margin-bottom: 20px; }
+.modal { background: #fff; border-radius: 14px; padding: 28px; width: 400px; max-width: 90vw; box-shadow: 0 20px 60px rgba(0,0,0,0.15); }
+.modal h3 { font-size: 17px; font-weight: 600; color: #111827; margin-bottom: 6px; }
+.modal p { font-size: 14px; color: #9CA3AF; margin-bottom: 20px; }
 .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
-.btn-cancel { background: #f4f6fb; color: #4a5568; }
-.loading { text-align: center; padding: 40px; color: #8a94a6; font-size: 14px; }
+
+/* LOADING */
+.loading { text-align: center; padding: 40px; color: #9CA3AF; font-size: 14px; }
 </style>
 </head>
 <body>
 
 <div class="sidebar">
   <div class="sidebar-logo">
-    <h1>Receb<span>AI</span></h1>
-    <p>Gestão de Encomendas</p>
+    <img src="https://bripper07.github.io/recebai/logo.png" alt="RecebAI" onerror="this.style.display='none'; this.nextElementSibling.style.display='block'" />
+    <div style="display:none; font-size:20px; font-weight:600; color:#1a1a1a;">Receb<span style="color:#F5A623;">AI</span><div style="font-size:11px;color:#9CA3AF;font-weight:400;margin-top:2px;">Gestão de Encomendas</div></div>
   </div>
   <nav class="nav">
     <div class="nav-item active" onclick="navigate('dashboard')">
@@ -96,6 +123,7 @@ tr:hover td { background: #f8faff; }
       Moradores
     </div>
   </nav>
+  <div class="sidebar-footer">Plataforma de Recebimento Inteligente</div>
 </div>
 
 <main class="main">
@@ -104,12 +132,12 @@ tr:hover td { background: #f8faff; }
     <div class="page-title">Dashboard</div>
     <div class="page-sub">Resumo geral das encomendas</div>
     <div class="stats-grid">
-      <div class="stat-card"><div class="stat-label">Total de Encomendas</div><div class="stat-value blue" id="stat-total">—</div></div>
+      <div class="stat-card"><div class="stat-label">Total de Encomendas</div><div class="stat-value yellow" id="stat-total">—</div></div>
       <div class="stat-card"><div class="stat-label">Aguardando Retirada</div><div class="stat-value amber" id="stat-aguardando">—</div></div>
       <div class="stat-card"><div class="stat-label">Retiradas Hoje</div><div class="stat-value green" id="stat-hoje">—</div></div>
     </div>
     <div class="card">
-      <div style="font-size:15px;font-weight:500;color:#1a1a2e;margin-bottom:16px">Encomendas aguardando retirada</div>
+      <div class="card-title">Encomendas aguardando retirada</div>
       <div id="dashboard-pending"><div class="loading">Carregando...</div></div>
     </div>
   </div>
@@ -136,7 +164,7 @@ tr:hover td { background: #f8faff; }
         </div>
         <div class="form-group">
           <label class="form-label">Unidade / Apto</label>
-          <input class="form-input" id="f-unidade" placeholder="Apto 42 - Bloco B" />
+          <input class="form-input" id="f-unidade" placeholder="Apto 42" onblur="buscarMorador()" />
         </div>
       </div>
       <button class="btn btn-primary" id="btn-registrar" onclick="registrarEncomenda()">Registrar Encomenda</button>
@@ -184,13 +212,13 @@ tr:hover td { background: #f8faff; }
         </div>
         <div class="form-group">
           <label class="form-label">Unidade / Apto</label>
-          <input class="form-input" id="m-unidade" placeholder="Apto 42 - Bloco B" />
+          <input class="form-input" id="m-unidade" placeholder="Apto 42" />
         </div>
       </div>
       <button class="btn btn-primary" id="btn-cadastrar-morador" onclick="cadastrarMorador()">Cadastrar Morador</button>
     </div>
     <div class="card">
-      <div style="font-size:15px;font-weight:500;color:#1a1a2e;margin-bottom:16px">Moradores cadastrados</div>
+      <div class="card-title">Moradores cadastrados</div>
       <div id="moradores-table"><div class="loading">Carregando...</div></div>
     </div>
   </div>
@@ -228,6 +256,19 @@ function navigate(page) {
   if (page === 'moradores') loadMoradores();
 }
 
+async function buscarMorador() {
+  const unidade = document.getElementById('f-unidade').value.trim();
+  if (!unidade) return;
+  try {
+    const data = await fetch(API_BASE + '/recebai/moradores').then(r => r.json());
+    const moradores = Array.isArray(data) ? data.filter(m => m.id && m.id !== 'id') : [];
+    const morador = moradores.find(m => (m.unidade||'').toLowerCase() === unidade.toLowerCase());
+    if (morador) {
+      document.getElementById('f-nome').value = morador.nome || '';
+    }
+  } catch(e) {}
+}
+
 async function loadDashboard() {
   try {
     const [stats, enc] = await Promise.all([
@@ -240,7 +281,7 @@ async function loadDashboard() {
     document.getElementById('stat-hoje').textContent = s.retirado_hoje ?? 0;
     const pending = Array.isArray(enc) ? enc.filter(e => e.id && e.id !== 'id') : [];
     const el = document.getElementById('dashboard-pending');
-    if (pending.length === 0) { el.innerHTML = '<div class="empty-state">Nenhuma encomenda aguardando retirada</div>'; return; }
+    if (pending.length === 0) { el.innerHTML = emptyState('Nenhuma encomenda aguardando retirada'); return; }
     el.innerHTML = renderTable(pending, false);
   } catch(e) { console.error(e); }
 }
@@ -258,7 +299,7 @@ async function loadHistorico() {
     const data = await fetch(API_BASE + '/recebai/encomendas?status=retirado').then(r => r.json());
     const rows = Array.isArray(data) ? data.filter(e => e.id && e.id !== 'id') : [];
     const el = document.getElementById('historico-table');
-    if (rows.length === 0) { el.innerHTML = '<div class="empty-state">Nenhuma encomenda retirada ainda</div>'; return; }
+    if (rows.length === 0) { el.innerHTML = emptyState('Nenhuma encomenda retirada ainda'); return; }
     el.innerHTML = renderTable(rows, false);
   } catch(e) { console.error(e); }
 }
@@ -268,7 +309,7 @@ async function loadMoradores() {
     const data = await fetch(API_BASE + '/recebai/moradores').then(r => r.json());
     const rows = Array.isArray(data) ? data.filter(m => m.id && m.id !== 'id') : [];
     const el = document.getElementById('moradores-table');
-    if (rows.length === 0) { el.innerHTML = '<div class="empty-state">Nenhum morador cadastrado ainda</div>'; return; }
+    if (rows.length === 0) { el.innerHTML = emptyState('Nenhum morador cadastrado ainda'); return; }
     const header = `<table><thead><tr><th>Nome</th><th>CPF</th><th>Celular</th><th>Unidade</th></tr></thead><tbody>`;
     const body = rows.map(m => `<tr><td>${m.nome||'—'}</td><td>${m.cpf||'—'}</td><td>${m.celular||'—'}</td><td>${m.unidade||'—'}</td></tr>`).join('');
     el.innerHTML = header + body + '</tbody></table>';
@@ -281,12 +322,12 @@ function filterTable() {
     (e.destinatario_nome||'').toLowerCase().includes(q) ||
     (e.destinatario_unidade||'').toLowerCase().includes(q)
   );
-  document.getElementById('encomendas-table').innerHTML = filtered.length ? renderTable(filtered, true) : '<div class="empty-state">Nenhum resultado encontrado</div>';
+  document.getElementById('encomendas-table').innerHTML = filtered.length ? renderTable(filtered, true) : emptyState('Nenhum resultado encontrado');
 }
 
 function renderEncomendasTable() {
   const el = document.getElementById('encomendas-table');
-  if (allEncomendas.length === 0) { el.innerHTML = '<div class="empty-state">Nenhuma encomenda cadastrada</div>'; return; }
+  if (allEncomendas.length === 0) { el.innerHTML = emptyState('Nenhuma encomenda cadastrada'); return; }
   el.innerHTML = renderTable(allEncomendas, true);
 }
 
@@ -299,11 +340,15 @@ function renderTable(rows, showAction) {
       : '<span class="badge badge-done">✓ Retirado</span>';
     const action = showAction && isWaiting
       ? `<button class="btn btn-sm btn-confirm" onclick="openModal('${r.id}')">Confirmar Retirada</button>`
-      : (showAction ? '<span style="color:#8a94a6;font-size:13px">—</span>' : '');
+      : (showAction ? '<span style="color:#D1D5DB;font-size:13px">—</span>' : '');
     const date = r.created_at ? new Date(r.created_at).toLocaleDateString('pt-BR') : '—';
-    return `<tr><td style="font-family:monospace;font-size:13px">${r.tracking_code||'—'}</td><td>${r.destinatario_nome||'—'}</td><td>${r.destinatario_unidade||'—'}</td><td>${r.transportadora||'—'}</td><td>${badge}</td><td>${date}</td>${showAction ? `<td>${action}</td>` : ''}</tr>`;
+    return `<tr><td style="font-family:monospace;font-size:13px;color:#6B7280">${r.tracking_code||'—'}</td><td><strong style="font-weight:500">${r.destinatario_nome||'—'}</strong></td><td>${r.destinatario_unidade||'—'}</td><td>${r.transportadora||'—'}</td><td>${badge}</td><td style="color:#9CA3AF">${date}</td>${showAction ? `<td>${action}</td>` : ''}</tr>`;
   }).join('');
   return header + body + '</tbody></table>';
+}
+
+function emptyState(msg) {
+  return `<div class="empty-state"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 3H8l-2 4h12l-2-4z"/></svg>${msg}</div>`;
 }
 
 async function registrarEncomenda() {
@@ -325,7 +370,7 @@ async function registrarEncomenda() {
       body: JSON.stringify({ tracking_code: tracking, destinatario_nome: nome, destinatario_unidade: unidade, transportadora: transp })
     });
     if (!res.ok) throw new Error();
-    showAlert(alertEl, 'success', 'Encomenda registrada com sucesso!');
+    showAlert(alertEl, 'success', 'Encomenda registrada com sucesso! Notificação enviada via WhatsApp.');
     document.getElementById('f-tracking').value = '';
     document.getElementById('f-nome').value = '';
     document.getElementById('f-unidade').value = '';
