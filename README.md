@@ -131,10 +131,3 @@ const API_BASE = 'https://SEU_N8N.app.n8n.cloud/webhook';
 - O webhook da Evolution API é configurado via POST em `/webhook/set/RecebAI`
 
 ---
-
-## Próximos Passos
-
-- OCR nas encomendas — foto da etiqueta → preenchimento automático
-- Match por CPF além da unidade
-- Alerta quando morador não está cadastrado
-- Relatório semanal automático por email
