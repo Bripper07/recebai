@@ -274,6 +274,14 @@ tr:hover td { background: #FAFAFA; }
       <div class="card-title">Encomendas paradas há mais de 3 dias</div>
       <div id="rel-paradas"><div class="loading">Carregando...</div></div>
     </div>
+
+    <div class="card" style="margin-top:16px; max-width:520px;">
+      <div class="card-title">Enviar relatório por e-mail</div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <input class="form-input" id="gestor-email" placeholder="email@gestor.com" type="email" style="flex:1" />
+        <button class="btn btn-primary" onclick="enviarRelatorio()">Enviar</button>
+      </div>
+    </div>
   </div>
 
 </main>
@@ -594,6 +602,26 @@ async function confirmarRetirada() {
   } catch(e) {
     alert('Erro ao confirmar retirada. Tente novamente.');
   }
+}
+
+function enviarRelatorio() {
+  const email = document.getElementById('gestor-email').value.trim();
+  if (!email) { alert('Informe o e-mail do gestor.'); return; }
+  const total = document.getElementById('rel-total').textContent;
+  const aguardando = document.getElementById('rel-aguardando').textContent;
+  const retiradas = document.getElementById('rel-retiradas').textContent;
+  const tempo = document.getElementById('rel-tempo').textContent;
+  const assunto = encodeURIComponent('Relatório RecebAI — ' + new Date().toLocaleDateString('pt-BR'));
+  const corpo = encodeURIComponent(
+    'Olá,\n\nSegue o relatório de encomendas do RecebAI:\n\n' +
+    '📦 Total de encomendas: ' + total + '\n' +
+    '⏳ Aguardando retirada: ' + aguardando + '\n' +
+    '✅ Retiradas: ' + retiradas + '\n' +
+    '⏱ Tempo médio de retirada: ' + tempo + '\n\n' +
+    'Acesse o painel completo em: https://bripper07.github.io/recebai\n\n' +
+    'RecebAI — Plataforma de Recebimento Inteligente'
+  );
+  window.location.href = `mailto:${email}?subject=${assunto}&body=${corpo}`;
 }
 
 loadDashboard();
