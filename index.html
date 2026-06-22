@@ -122,6 +122,10 @@ tr:hover td { background: #FAFAFA; }
       <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
       Moradores
     </div>
+    <div class="nav-item" onclick="navigate('relatorio')">
+      <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 0 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      Relatório
+    </div>
   </nav>
   <div class="sidebar-footer">Plataforma de Recebimento Inteligente</div>
 </div>
@@ -223,6 +227,31 @@ tr:hover td { background: #FAFAFA; }
     </div>
   </div>
 
+  <div id="relatorio" class="page">
+    <div class="page-title">Relatório do Gestor</div>
+    <div class="page-sub">Visão geral da operação de encomendas</div>
+    <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr);">
+      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value yellow" id="rel-total">—</div></div>
+      <div class="stat-card"><div class="stat-label">Aguardando</div><div class="stat-value amber" id="rel-aguardando">—</div></div>
+      <div class="stat-card"><div class="stat-label">Retiradas</div><div class="stat-value green" id="rel-retiradas">—</div></div>
+      <div class="stat-card"><div class="stat-label">Tempo médio de retirada</div><div class="stat-value" id="rel-tempo" style="font-size:20px;color:#111827">—</div></div>
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:16px;">
+      <div class="card">
+        <div class="card-title">Por transportadora</div>
+        <div id="rel-transportadoras"><div class="loading">Carregando...</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Por unidade (top 10)</div>
+        <div id="rel-unidades"><div class="loading">Carregando...</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Encomendas paradas há mais de 3 dias</div>
+      <div id="rel-paradas"><div class="loading">Carregando...</div></div>
+    </div>
+  </div>
+
 </main>
 
 <div class="modal-overlay" id="modal-overlay">
@@ -248,12 +277,99 @@ function navigate(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById(page).classList.add('active');
-  const idx = ['dashboard','portaria','encomendas','historico','moradores'].indexOf(page);
+  const idx = ['dashboard','portaria','encomendas','historico','moradores','relatorio'].indexOf(page);
   document.querySelectorAll('.nav-item')[idx].classList.add('active');
   if (page === 'dashboard') loadDashboard();
   if (page === 'encomendas') loadEncomendas();
   if (page === 'historico') loadHistorico();
   if (page === 'moradores') loadMoradores();
+  if (page === 'relatorio') loadRelatorio();
+}
+
+async function loadRelatorio() {
+  try {
+    const data = await fetch(API_BASE + '/recebai/encomendas').then(r => r.json());
+    const enc = Array.isArray(data) ? data.filter(e => e.id && e.id !== 'id') : [];
+
+    const total = enc.length;
+    const aguardando = enc.filter(e => e.status === 'aguardando_retirada').length;
+    const retiradas = enc.filter(e => e.status === 'retirado').length;
+
+    document.getElementById('rel-total').textContent = total;
+    document.getElementById('rel-aguardando').textContent = aguardando;
+    document.getElementById('rel-retiradas').textContent = retiradas;
+
+    // Tempo médio de retirada
+    const comTempo = enc.filter(e => e.status === 'retirado' && e.created_at && e.retirada_at);
+    if (comTempo.length > 0) {
+      const mediaMs = comTempo.reduce((acc, e) => {
+        return acc + (new Date(e.retirada_at) - new Date(e.created_at));
+      }, 0) / comTempo.length;
+      const dias = Math.floor(mediaMs / 86400000);
+      const horas = Math.floor((mediaMs % 86400000) / 3600000);
+      document.getElementById('rel-tempo').textContent = dias > 0 ? `${dias}d ${horas}h` : `${horas}h`;
+    } else {
+      document.getElementById('rel-tempo').textContent = '—';
+    }
+
+    // Por transportadora
+    const transp = {};
+    enc.forEach(e => {
+      const t = e.transportadora || 'Desconhecida';
+      transp[t] = (transp[t] || 0) + 1;
+    });
+    const transpSorted = Object.entries(transp).sort((a,b) => b[1]-a[1]);
+    const maxT = transpSorted[0]?.[1] || 1;
+    document.getElementById('rel-transportadoras').innerHTML = transpSorted.length ? transpSorted.map(([nome, count]) => `
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+          <span style="color:#374151">${nome}</span>
+          <span style="color:#9CA3AF;font-weight:500">${count}</span>
+        </div>
+        <div style="background:#F3F4F6;border-radius:4px;height:6px;">
+          <div style="background:#F5A623;border-radius:4px;height:6px;width:${Math.round(count/maxT*100)}%"></div>
+        </div>
+      </div>`).join('') : '<div class="empty-state">Sem dados</div>';
+
+    // Por unidade (top 10)
+    const unid = {};
+    enc.forEach(e => {
+      const u = e.destinatario_unidade || 'Desconhecida';
+      unid[u] = (unid[u] || 0) + 1;
+    });
+    const unidSorted = Object.entries(unid).sort((a,b) => b[1]-a[1]).slice(0,10);
+    const maxU = unidSorted[0]?.[1] || 1;
+    document.getElementById('rel-unidades').innerHTML = unidSorted.length ? unidSorted.map(([nome, count]) => `
+      <div style="margin-bottom:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+          <span style="color:#374151">${nome}</span>
+          <span style="color:#9CA3AF;font-weight:500">${count}</span>
+        </div>
+        <div style="background:#F3F4F6;border-radius:4px;height:6px;">
+          <div style="background:#D4940A;border-radius:4px;height:6px;width:${Math.round(count/maxU*100)}%"></div>
+        </div>
+      </div>`).join('') : '<div class="empty-state">Sem dados</div>';
+
+    // Paradas há mais de 3 dias
+    const agora = new Date();
+    const paradas = enc.filter(e => {
+      if (e.status !== 'aguardando_retirada' || !e.created_at) return false;
+      const dias = (agora - new Date(e.created_at)) / 86400000;
+      return dias > 3;
+    });
+    const elP = document.getElementById('rel-paradas');
+    if (paradas.length === 0) {
+      elP.innerHTML = '<div class="empty-state">Nenhuma encomenda parada há mais de 3 dias</div>';
+    } else {
+      const header = `<table><thead><tr><th>Código</th><th>Destinatário</th><th>Unidade</th><th>Transportadora</th><th>Chegada</th><th>Dias parada</th></tr></thead><tbody>`;
+      const body = paradas.map(r => {
+        const dias = Math.floor((agora - new Date(r.created_at)) / 86400000);
+        const date = new Date(r.created_at).toLocaleDateString('pt-BR');
+        return `<tr><td style="font-family:monospace;font-size:13px;color:#6B7280">${r.tracking_code||'—'}</td><td>${r.destinatario_nome||'—'}</td><td>${r.destinatario_unidade||'—'}</td><td>${r.transportadora||'—'}</td><td style="color:#9CA3AF">${date}</td><td><span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500">${dias} dias</span></td></tr>`;
+      }).join('');
+      elP.innerHTML = header + body + '</tbody></table>';
+    }
+  } catch(e) { console.error(e); }
 }
 
 async function buscarMorador() {
