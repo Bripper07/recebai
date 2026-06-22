@@ -1,157 +1,140 @@
-# RecebAI — Gestão de Encomendas para Condomínios
+# 📦 RecebAI — Plataforma de Recebimento Inteligente
 
-Plataforma para gerenciar encomendas recebidas na portaria de condomínios, com notificação automática via WhatsApp para os moradores.
-
-Projeto Integrador — PUC Rio, Introdução à IA.
-
-**Demo:** https://bripper07.github.io/recebai
+> Projeto Integrador — Introdução à IA | PUC-Rio  
+> **Equipe:** Bruno, Pedro Henrique, Marcelo, Isabel, João Henrique
 
 ---
 
-## O que o sistema faz
+## O que é o RecebAI?
 
-- Portaria registra encomenda recebida
-- Morador recebe notificação automática no WhatsApp
-- Morador vai à portaria e confirma retirada
-- Dashboard mostra estatísticas em tempo real
-- Cadastro de moradores com preenchimento automático de telefone na hora do registro
+O RecebAI é uma plataforma de gestão de encomendas para condomínios. Quando uma encomenda chega na portaria, o sistema registra os dados, notifica o morador automaticamente via WhatsApp com uma mensagem personalizada por IA, e permite que o morador consulte suas encomendas conversando diretamente com um agente de IA pelo WhatsApp.
+
+**Site:** https://bripper07.github.io/recebai
 
 ---
 
-## Tecnologias
+## Funcionalidades
 
-- **Frontend:** HTML/CSS/JS puro, hospedado no GitHub Pages
-- **Backend:** n8n Cloud (sem código próprio, só workflows)
-- **Banco de dados:** Google Sheets
-- **Notificações:** Evolution API + WhatsApp (via Baileys)
-- **Hospedagem da Evolution API:** Railway
+- **Registro de encomendas** pelo porteiro via painel web
+- **Notificação automática** via WhatsApp com mensagem personalizada por IA ao receber
+- **Agente conversacional** no WhatsApp — o morador pergunta sobre suas encomendas e o agente responde com memória de conversa
+- **Reenvio automático** de lembrete após 3 dias de encomenda parada
+- **Relatório do gestor** com métricas, gráficos e alertas de encomendas paradas
+- **Envio de relatório por email** com conteúdo gerado por IA
+- **Site responsivo** — funciona em celular e computador
+- **Cadastro de moradores** com nome, CPF, celular e unidade
 
 ---
 
-## Estrutura do repositório
+## Stack Tecnológico
+
+| Componente | Tecnologia |
+|---|---|
+| Frontend | GitHub Pages (HTML/CSS/JS) |
+| Backend | n8n Cloud (automação via workflows) |
+| Banco de dados | Google Sheets |
+| WhatsApp | Evolution API 2.3.7 (Railway) |
+| IA | OpenAI GPT-4o mini |
+| Memória do agente | n8n Simple Memory |
+| Email | Gmail OAuth2 via n8n |
+
+---
+
+## Arquitetura
 
 ```
-recebai/
-├── index.html              # Frontend completo (single page app)
-└── workflows/
-    ├── RecebAI - 1. Serve Frontend.json
-    ├── RecebAI - 2. Listar Encomendas.json
-    ├── RecebAI - 3. Registrar Encomenda.json
-    ├── RecebAI - 4. Confirmar Retirada.json
-    ├── RecebAI - 5. Stats.json
-    ├── RecebAI - 6. Cadastro Moradores.json
-    └── RecebAI - 7. Listar Moradores.json
+Porteiro (web) → n8n Workflow 3 → Google Sheets
+                              ↓
+                      OpenAI (gera mensagem)
+                              ↓
+                      Evolution API → WhatsApp (morador)
+
+Morador (WhatsApp) → Evolution API → n8n Workflow 8 (Agente)
+                                           ↓
+                                    Google Sheets (busca encomendas)
+                                           ↓
+                                    OpenAI + Simple Memory
+                                           ↓
+                                    Evolution API → WhatsApp (resposta)
+
+Schedule (todo dia 9h) → n8n Workflow 9 → Google Sheets
+                                               ↓
+                                     Filtra encomendas > 3 dias
+                                               ↓
+                                     Evolution API → WhatsApp (lembrete)
 ```
 
 ---
 
-## Como configurar do zero
+## Workflows n8n (10 no total)
 
-### 1. Google Sheets
+| # | Nome | Função |
+|---|---|---|
+| 1 | Serve Frontend | Servia o HTML (desativado) |
+| 2 | Listar Encomendas | GET `/recebai/encomendas` |
+| 3 | Registrar Encomenda | POST `/recebai/encomendas` + notificação WhatsApp |
+| 4 | Confirmar Retirada | POST `/recebai/encomendas/retirar` |
+| 5 | Stats | GET `/recebai/stats` |
+| 6 | Cadastro Moradores | POST `/recebai/moradores` |
+| 7 | Listar Moradores | GET `/recebai/moradores` |
+| 8 | Agente Conversacional | Webhook WhatsApp + IA com memória |
+| 9 | Reenvio de Notificação | Schedule diário às 9h |
+| 10 | Enviar Relatório Email | POST `/recebai/relatorio/email` |
 
-Crie uma planilha e adicione duas abas:
+---
 
-**Aba 1 — `RecebAI - Encomendas`**
-Colunas na linha 1:
+## Google Sheets
+
+**ID:** `1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c`
+
+**Aba `RecebAI - Encomendas`:**
 ```
 id | tracking_code | destinatario_nome | destinatario_unidade | transportadora | status | created_at | retirada_at | retirada_por | destinatario_telefone
 ```
 
-**Aba 2 — `RecebAI - Moradores`**
-Colunas na linha 1:
+**Aba `RecebAI - Moradores`:**
 ```
 id | nome | cpf | celular | unidade
 ```
 
-Anote o ID da planilha (parte da URL entre `/d/` e `/edit`).
-
 ---
 
-### 2. n8n Cloud
+## Como rodar localmente
 
-1. Crie uma conta em [n8n.io](https://n8n.io)
-2. Conecte sua conta do Google Sheets via OAuth (Settings > Credentials)
-3. Importe os 7 workflows da pasta `/workflows` um por um (menu > Import from file)
-4. Em cada workflow que usa o Google Sheets, atualize o campo **Document** para apontar pra sua planilha
-5. Ative todos os workflows (botão Inactive > Active)
+O frontend é um único arquivo `index.html` — basta abrir no browser. Não há dependências ou build.
 
-Anote a URL base dos seus webhooks (ex: `https://seuusuario.app.n8n.cloud/webhook`).
-
----
-
-### 3. Evolution API (WhatsApp)
-
-1. Crie uma conta no [Railway](https://railway.app)
-2. Faça deploy do template **"Evolution API Whatsapp using n8n"**
-3. Acesse o manager da Evolution API (`sua-url.railway.app/manager`)
-4. Crie uma instância chamada `RecebAI`
-5. Conecte um número de WhatsApp escaneando o QR Code
-6. Anote a URL base e a API Key global
-
-> O número conectado será o remetente das notificações. Pode ser qualquer número WhatsApp, inclusive pessoal.
-
----
-
-### 4. Frontend
-
-No arquivo `index.html`, na linha do `API_BASE`, substitua pela URL dos seus webhooks:
+Para apontar para sua própria instância de n8n, troque a constante `API_BASE` no topo do script:
 
 ```javascript
-const API_BASE = 'https://seuusuario.app.n8n.cloud/webhook';
-```
-
-Hospede o `index.html` no GitHub Pages:
-- Repositório > Settings > Pages > Source: main branch, pasta raiz
-
----
-
-### 5. Workflow 3 — Notificação WhatsApp
-
-No nó **HTTP Request** do workflow de Registrar Encomenda, configure:
-
-```
-Method: POST
-URL: https://sua-evolution-api.railway.app/message/sendText/RecebAI
-Header: apikey: SUA_API_KEY
-Body: {
-  "number": "{{ $('Prepare Data').first().json.destinatario_telefone }}",
-  "text": "Olá {{ $('Prepare Data').first().json.destinatario_nome }}! Sua encomenda ({{ $('Prepare Data').first().json.transportadora }} - {{ $('Prepare Data').first().json.tracking_code }}) chegou na portaria. Por favor, retire no horário disponível. 📦"
-}
-```
-
-> O número precisa ter o código do país. O sistema já adiciona `55` automaticamente para números brasileiros.
-
----
-
-## Fluxo completo
-
-```
-Portaria preenche formulário
-        ↓
-Webhook POST /recebai/encomendas
-        ↓
-Salva no Google Sheets
-        ↓
-Envia WhatsApp pro morador
-        ↓
-Morador vai à portaria
-        ↓
-Portaria clica em "Confirmar Retirada"
-        ↓
-Webhook POST /recebai/encomendas/retirar
-        ↓
-Atualiza status no Google Sheets
+const API_BASE = 'https://SEU_N8N.app.n8n.cloud/webhook';
 ```
 
 ---
 
-## Credenciais do projeto (demo)
+## Infraestrutura
 
-> Não reutilize em produção.
-
-| Serviço | Valor |
+| Serviço | URL |
 |---|---|
-| n8n Cloud | https://bripper.app.n8n.cloud |
+| Frontend | https://bripper07.github.io/recebai |
+| n8n Cloud | https://brunin00.app.n8n.cloud |
 | Evolution API | https://evolution-api-production-2cb9.up.railway.app |
-| Instância WhatsApp | RecebAI |
-| Google Sheets ID | 1S0PaEIVJ7fbjzipFDXFoFrtmrxxuem1IA3VMk7BL73c |
+| Instância WhatsApp | RecebAI (+55 67 98476 0343) |
+
+---
+
+## Observações importantes para reprodução
+
+- Números de telefone devem ser salvos **com o prefixo 55** (ex: `5521999999999`)
+- O filtro de busca no Google Sheets deve estar em **modo Expression**, não Fixed
+- O nó Append to Google Sheets deve referenciar `$('Prepare Data').first().json.campo` e não `$json.campo`
+- A Evolution API 2.3.7 usa `{ "number": "...", "text": "..." }` para envio de mensagens
+- O webhook da Evolution API é configurado via POST em `/webhook/set/RecebAI`
+
+---
+
+## Próximos Passos
+
+- OCR nas encomendas — foto da etiqueta → preenchimento automático
+- Match por CPF além da unidade
+- Alerta quando morador não está cadastrado
+- Relatório semanal automático por email
